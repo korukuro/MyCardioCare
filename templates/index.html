@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Disease Prediction</title>
+</head>
+<body>
+    <h2>Disease Prediction Based on Symptoms</h2>
+    <form action="/predict" method="post">
+        <label for="fever">Does the patient have fever?</label><br>
+        <input type="radio" id="fever_yes" name="fever" value="Yes">
+        <label for="fever_yes">Yes</label><br>
+        <input type="radio" id="fever_no" name="fever" value="No">
+        <label for="fever_no">No</label><br><br>
+        
+        <label for="cough">Does the patient have cough?</label><br>
+        <input type="radio" id="cough_yes" name="cough" value="Yes">
+        <label for="cough_yes">Yes</label><br>
+        <input type="radio" id="cough_no" name="cough" value="No">
+        <label for="cough_no">No</label><br><br>
+        
+        <label for="fatigue">Does the patient have fatigue?</label><br>
+        <input type="radio" id="fatigue_yes" name="fatigue" value="Yes">
+        <label for="fatigue_yes">Yes</label><br>
+        <input type="radio" id="fatigue_no" name="fatigue" value="No">
+        <label for="fatigue_no">No</label><br><br>
+        
+        <label for="headache">Does the patient have headache?</label><br>
+        <input type="radio" id="headache_yes" name="headache" value="Yes">
+        <label for="headache_yes">Yes</label><br>
+        <input type="radio" id="headache_no" name="headache" value="No">
+        <label for="headache_no">No</label><br><br>
+        
+        <label for="sore_throat">Does the patient have sore throat?</label><br>
+        <input type="radio" id="sore_throat_yes" name="sore_throat" value="Yes">
+        <label for="sore_throat_yes">Yes</label><br>
+        <input type="radio" id="sore_throat_no" name="sore_throat" value="No">
+        <label for="sore_throat_no">No</label><br><br>
+        
+        <label for="runny_nose">Does the patient have runny nose?</label><br>
+        <input type="radio" id="runny_nose_yes" name="runny_nose" value="Yes">
+        <label for="runny_nose_yes">Yes</label><br>
+        <input type="radio" id="runny_nose_no" name="runny_nose" value="No">
+        <label for="runny_nose_no">No</label><br><br>
+        
+        <label for="muscle_pain">Does the patient have muscle pain?</label><br>
+        <input type="radio" id="muscle_pain_yes" name="muscle_pain" value="Yes">
+        <label for="muscle_pain_yes">Yes</label><br>
+        <input type="radio" id="muscle_pain_no" name="muscle_pain" value="No">
+        <label for="muscle_pain_no">No</label><br><br>
+        
+        <input type="submit" value="Predict">
+    </form>
+    {% if prediction_text %}
+        <h3>{{ prediction_text }}</h3>
+    {% endif %}
+</body>
+</html>
