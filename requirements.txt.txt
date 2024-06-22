@@ -1,0 +1,5 @@
+pandas
+scikit-learn
+Flask
+Flask-Mail
+gunicorn
