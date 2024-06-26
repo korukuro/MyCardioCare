@@ -41,21 +41,21 @@ Y = df.iloc[:, 17].values
 target_encoder = LabelEncoder()
 Y = target_encoder.fit_transform(Y)
 
-# Split the data into training and testing sets
-x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+# # Split the data into training and testing sets
+# x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
 
 # Initialize the random forest classifier
 rf_classifier = RandomForestClassifier()
 
 # Fit the random forest classifier
-rf_classifier.fit(x_train, y_train)
+rf_classifier.fit(X,Y)
 
 # Predict on the test data
-y_pred = rf_classifier.predict(x_test)
+# y_pred = rf_classifier.predict(x_test)
 
-# Calculate and print the accuracy
-accuracy = accuracy_score(y_test, y_pred)
-print(f"Random Forest Classifier Accuracy: {accuracy}")
+# # Calculate and print the accuracy
+# accuracy = accuracy_score(y_test, y_pred)
+# print(f"Random Forest Classifier Accuracy: {accuracy}")
 
 def age_cat(age):
     if 18 <= age <= 24:
