@@ -15,12 +15,13 @@ body {
   background-size: cover;
 }
 
+
 #chatbox {
+  margin:auto;
   background-color: #ffffff;
   padding: 20px;
   border-radius: 10px;
   max-width: 600px;
-  margin: 20px auto;
   box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   height: 85vh; /* 70% of viewport height */
   display: flex;
@@ -56,10 +57,14 @@ body {
 }
 
 #user-input {
+  width: 95%;
   display: flex;
   margin-top: 10px;
   align-items: center;
+  justify-content: space-evenly;
   margin-bottom: 20px; /* Bottom margin for the input area */
+  margin-left: auto;
+  margin-right: auto;
   position: sticky;
   bottom: 10px;
   background-color: #ffffff;
@@ -75,21 +80,19 @@ body {
   border-radius: 5px;
   margin-right: 10px;
   font-size: 16px;
+  width: 70%;
+  /* width: phle jaisa krna toh isko change krdo */
 }
 
-button {
+#userButton {
+  border-radius: 5px; /* Using pixels for a noticeable change */
   padding: 10px;
-  margin-left: 10px;
+  /* margin-left: 10px; */
   border: none;
   background-color: #0d6efd;
   color: white;
-  border-radius: 5px;
   cursor: pointer;
   font-size: 16px;
-}
-
-button:hover {
-  background-color: #0b5ed7;
 }
 
 .mymargin {
@@ -101,4 +104,8 @@ button:hover {
       margin: 10px;
       height: 80vh;
   }
+}
+
+#button:hover {
+  background-color: #0b5ed7;
 }
