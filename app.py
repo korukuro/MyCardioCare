@@ -1,8 +1,11 @@
-import pandas as pd
-from sklearn.model_selection import train_test_split
-from sklearn.tree import DecisionTreeClassifier
 from flask import Flask, request, render_template
 from flask_mail import Mail, Message
+import numpy as np
+import pandas as pd
+from sklearn.preprocessing import LabelEncoder
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.metrics import accuracy_score
 
 app = Flask(__name__)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
@@ -15,29 +18,124 @@ app.config['MAIL_DEFAULT_SENDER'] = 'mycardiocare@gmail.com'  # Default sender e
 
 mail = Mail(app)
 
-# Create the improved dataset
-data = {
-    'Fever': ['Yes', 'Yes', 'No', 'No', 'Yes', 'Yes', 'No', 'No', 'Yes', 'Yes', 'Yes', 'No', 'No'],
-    'Cough': ['Yes', 'Yes', 'Yes', 'Yes', 'No', 'No', 'No', 'No', 'Yes', 'Yes', 'No', 'No', 'No'],
-    'Fatigue': ['Yes', 'Yes', 'Yes', 'No', 'Yes', 'Yes', 'Yes', 'Yes', 'No', 'Yes', 'Yes', 'No', 'No'],
-    'Headache': ['Yes', 'No', 'No', 'No', 'Yes', 'No', 'Yes', 'No', 'Yes', 'Yes', 'No', 'No', 'No'],
-    'Sore Throat': ['Yes', 'Yes', 'Yes', 'Yes', 'No', 'No', 'No', 'No', 'No', 'No', 'Yes', 'Yes', 'No'],
-    'Runny Nose': ['No', 'Yes', 'Yes', 'Yes', 'No', 'No', 'No', 'No', 'No', 'Yes', 'No', 'Yes', 'No'],
-    'Muscle Pain': ['Yes', 'Yes', 'No', 'No', 'Yes', 'Yes', 'Yes', 'Yes', 'No', 'No', 'No', 'No', 'No'],
-    'Disease': ['Influenza', 'Influenza', 'Common Cold', 'Common Cold', 'Dengue', 'Dengue', 'Migraine', 'Migraine', 'Covid-19', 'Covid-19', 'Strep Throat', 'Allergies', 'No Disease']
-}
+# Load the data
+dataframe = pd.read_csv("static/myheart.csv")
+df = pd.DataFrame(dataframe)
+df = df.astype(str)
 
-df = pd.DataFrame(data)
-df_encoded = pd.get_dummies(df, columns=['Fever', 'Cough', 'Fatigue', 'Headache', 'Sore Throat', 'Runny Nose', 'Muscle Pain'])
-X = df_encoded.drop('Disease', axis=1)
-y = df_encoded['Disease']
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
-clf = DecisionTreeClassifier()
-clf.fit(X_train, y_train)
+# Encode categorical features
+columns_to_encode = ['General_Health', 'Checkup', 'Exercise','Skin_Cancer', 'Other_Cancer', 'Depression', 'Diabetes', 'Arthritis', 'Sex', 'Age_Category', 'Height_(cm)', 'Weight_(kg)', 'Smoking_History', 'Alcohol_Consumption', 'Fruit_Consumption', 'Green_Vegetables_Consumption', 'FriedPotato_Consumption']
+
+# Create a dictionary to store the label encoders for each column
+label_encoders = {}
+
+for column in columns_to_encode:
+    label_encoders[column] = LabelEncoder()
+    df[column] = label_encoders[column].fit_transform(df[column])
+
+# Separate features and target variable
+X = df.iloc[:, 0:17].values
+Y = df.iloc[:, 17].values
+
+# Encode the target variable
+target_encoder = LabelEncoder()
+Y = target_encoder.fit_transform(Y)
+
+# Split the data into training and testing sets
+x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
+
+# Initialize the random forest classifier
+rf_classifier = RandomForestClassifier()
+
+# Fit the random forest classifier
+rf_classifier.fit(x_train, y_train)
+
+# Predict on the test data
+y_pred = rf_classifier.predict(x_test)
+
+# Calculate and print the accuracy
+accuracy = accuracy_score(y_test, y_pred)
+print(f"Random Forest Classifier Accuracy: {accuracy}")
+
+def age_cat(age):
+    if 18 <= age <= 24:
+        return "18-24"
+    elif 25 <= age <= 29:
+        return "25-29"
+    elif 30 <= age <= 34:
+        return "30-34"
+    elif 35 <= age <= 39:
+        return "35-39"
+    elif 40 <= age <= 44:
+        return "40-44"
+    elif 45 <= age <= 49:
+        return "45-49"
+    elif 50 <= age <= 54:
+        return "50-54"
+    elif 55 <= age <= 59:
+        return "55-59"
+    elif 60 <= age <= 64:
+        return "60-64"
+    elif 65 <= age <= 69:
+        return "65-69"
+    elif 70 <= age <= 74:
+        return "70-74"
+    elif 75 <= age <= 79:
+        return "75-79"
+    elif age >= 80:
+        return "80+"
+    else:
+        return "Invalid age"
+
+def categorize_weight(weight_kg):
+    if weight_kg >= 100:
+        return "100+"
+    elif 85 <= weight_kg < 100:
+        return "85-100"
+    elif 76.5 <= weight_kg < 85:
+        return "76.5-85"
+    elif 70 <= weight_kg < 76.5:
+        return "70-76.5"
+    elif 64 <= weight_kg < 70:
+        return "64-70"
+    elif 59 <= weight_kg < 64:
+        return "59-64"
+    elif 55 <= weight_kg < 59:
+        return "55-59"
+    elif 52 <= weight_kg < 55:
+        return "52-55"
+    elif 48 <= weight_kg < 52:
+        return "48-52"
+    elif weight_kg < 48:
+        return "0-48"
+
+def categorize_height(height_cm):
+    if height_cm >= 210:
+        return "210 cm and above"
+    elif 200 <= height_cm < 210:
+        return "200-209 cm"
+    elif 190 <= height_cm < 200:
+        return "190-199 cm"
+    elif 180 <= height_cm < 190:
+        return "180-189 cm"
+    elif 170 <= height_cm < 180:
+        return "170-179 cm"
+    elif 160 <= height_cm < 170:
+        return "160-169 cm"
+    elif 150 <= height_cm < 160:
+        return "150-159 cm"
+    elif 140 <= height_cm < 150:
+        return "140-149 cm"
+    elif height_cm < 140:
+        return "Up to 139 cm"
 
 @app.route('/')
 def home():
     return render_template('index.html')
+
+@app.route('/about',methods=['GET'])
+def about():
+    return render_template('about.html')
 
 @app.route('/predict', methods=['POST'])
 def predict():
@@ -47,54 +145,75 @@ def predict():
         customer_email = request.form['customer_email']
         
         # Get symptoms data
-        fever = request.form['fever']
-        cough = request.form['cough']
-        fatigue = request.form['fatigue']
-        headache = request.form['headache']
-        sore_throat = request.form['sore_throat']
-        runny_nose = request.form['runny_nose']
-        muscle_pain = request.form['muscle_pain']
+        general_health = request.form['general_health'].lower()
+        checkup = request.form['checkup'].lower()
+        exercise = request.form['exercise'].lower()
+        skin_cancer = request.form['skin_cancer'].lower()
+        other_cancer = request.form['other_cancer'].lower()
+        depression = request.form['depression'].lower()
+        diabetes = request.form['diabetes'].lower()
+        arthritis = request.form['arthritis'].lower()
+        sex = request.form['sex'].lower()
+        age = int(request.form['age'])
+        age_category = age_cat(age)
+        height = float(request.form['height'])
+        weight = float(request.form['weight'])
+        smoking = request.form['smoking'].lower()
+        alcohol = request.form['alcohol'].lower()
+        fruit = request.form['fruit'].lower()
+        vegetable = request.form['vegetable'].lower()
+        potato = request.form['potato'].lower()
         
-        # Check if all symptoms are 'No'
-        if fever == 'No' and cough == 'No' and fatigue == 'No' and headache == 'No' and sore_throat == 'No' and runny_nose == 'No' and muscle_pain == 'No':
-            prediction = 'No Disease'
+        input_data = {
+
+            'General_Health': general_health.capitalize(),
+            'Checkup': checkup,
+            'Exercise': exercise.capitalize(),
+            'Skin_Cancer': skin_cancer.capitalize(),
+            'Other_Cancer': other_cancer.capitalize(),
+            'Depression': depression.capitalize(),
+            'Diabetes': diabetes.capitalize(),
+            'Arthritis': arthritis.capitalize(),
+            'Sex': sex.capitalize(),
+            'Age_Category': age_category.capitalize(),
+            'Height_(cm)': categorize_height(height),
+            'Weight_(kg)': categorize_weight(weight),
+            'Smoking_History': smoking.capitalize(),
+            'Alcohol_Consumption': alcohol.capitalize(),
+            'Fruit_Consumption': fruit.capitalize(),
+            'Green_Vegetables_Consumption': vegetable.capitalize(),
+            'FriedPotato_Consumption': potato.capitalize(),
+        }
+        
+        input_df = pd.DataFrame([input_data])
+        input_df = input_df.astype(str)
+
+        # Transform categorical columns using label_encoders
+        for column in columns_to_encode:
+            input_df[column] = label_encoders[column].transform(input_df[column])
+
+        # Make prediction using the trained model
+        prediction = rf_classifier.predict(input_df.values)[0]
+        predicted_label = target_encoder.inverse_transform([prediction])[0]
+        
+        # Prepare the message to send
+        if predicted_label == 'Yes':
+            message = f"Dear {customer_name},\n\nBased on the information you provided, our analysis suggests a potential concern regarding heart disease. However, please note that this is a prediction and not a definitive diagnosis.\n\nWe strongly recommend consulting with your healthcare provider for further evaluation and guidance.\n\nBest regards,\nTeam myCardioCare"
         else:
-            # Prepare input data for prediction
-            input_data = {
-                'Fever_Yes': [1 if fever == 'Yes' else 0],
-                'Fever_No': [1 if fever == 'No' else 0],
-                'Cough_Yes': [1 if cough == 'Yes' else 0],
-                'Cough_No': [1 if cough == 'No' else 0],
-                'Fatigue_Yes': [1 if fatigue == 'Yes' else 0],
-                'Fatigue_No': [1 if fatigue == 'No' else 0],
-                'Headache_Yes': [1 if headache == 'Yes' else 0],
-                'Headache_No': [1 if headache == 'No' else 0],
-                'Sore Throat_Yes': [1 if sore_throat == 'Yes' else 0],
-                'Sore Throat_No': [1 if sore_throat == 'No' else 0],
-                'Runny Nose_Yes': [1 if runny_nose == 'Yes' else 0],
-                'Runny Nose_No': [1 if runny_nose == 'No' else 0],
-                'Muscle Pain_Yes': [1 if muscle_pain == 'Yes' else 0],
-                'Muscle Pain_No': [1 if muscle_pain == 'No' else 0],
-            }
-            
-            input_df = pd.DataFrame(input_data)
-            input_df = input_df.reindex(columns=X_train.columns, fill_value=0)
-            
-            # Make prediction using the trained model
-            prediction = clf.predict(input_df)[0]
-        
+            message = f"Dear {customer_name},\n\nBased on the information you provided, our analysis does not indicate a possibility of heart disease. However, it is important to consult with your healthcare provider for a comprehensive evaluation.\n\nBest regards,\nTeam myCardioCare"
+
         # Send email to the customer
         msg = Message('Disease Prediction Result', recipients=[customer_email])
-        msg.body = f"Dear {customer_name},\n\nBased on the symptoms you provided, the predicted disease is: {prediction}\n\nBest regards,\nTeam mycardiocare"
+        msg.body = message
         mail.send(msg)
         
         # Print prediction to console for verification
-        print(f"The predicted disease for {customer_name} is: {prediction}")
+        print(message)
         
-        return render_template('index.html', prediction_text=f'The predicted disease is: {prediction}')
+        return render_template('result.html', prediction_text=f'The possibility of heart disease is: {predicted_label}', message=message)
     
     except Exception as e:
-        return render_template('index.html', prediction_text=f'An error occurred: {str(e)}')
+        return render_template('result.html', prediction_text=f'An error occurred: {str(e)}')
 
 if __name__ == "__main__":
     app.run(debug=True)
