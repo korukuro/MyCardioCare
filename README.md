@@ -1,2 +1,2 @@
-# Disease-Predictor-Web-App
-This project is a Disease Predictor web application that allows users to input symptoms and predicts possible diseases using a machine learning model. The application is built using Flask for the web framework and a Decision Tree Classifier for the machine learning model.
+# Heaert-Disease-Predictor-Web-App
+This project is a Flask web application that predicts the likelihood of heart disease using a machine learning model. It features user input forms for health data, a Random Forest classifier for predictions, and email notifications for users about their results. The application ensures secure handling of sensitive information by storing credentials in a .env file.
