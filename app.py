@@ -6,12 +6,17 @@ from sklearn.preprocessing import LabelEncoder
 from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import accuracy_score
+from dotenv import load_dotenv
+import os
+
+# Load environment variables from .env file
+load_dotenv()
 
 app = Flask(__name__)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
 app.config['MAIL_USERNAME'] = 'mycardiocareindia@gmail.com'  # Your email address
-app.config['MAIL_PASSWORD'] = 'aclvipqzxzjjzeta'  # Your email password
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # Load email password from .env
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
 app.config['MAIL_DEFAULT_SENDER'] = 'mycardiocare@gmail.com'  # Default sender email
@@ -41,21 +46,11 @@ Y = df.iloc[:, 17].values
 target_encoder = LabelEncoder()
 Y = target_encoder.fit_transform(Y)
 
-# # Split the data into training and testing sets
-# x_train, x_test, y_train, y_test = train_test_split(X, Y, test_size=0.2)
-
 # Initialize the random forest classifier
 rf_classifier = RandomForestClassifier()
 
 # Fit the random forest classifier
-rf_classifier.fit(X,Y)
-
-# Predict on the test data
-# y_pred = rf_classifier.predict(x_test)
-
-# # Calculate and print the accuracy
-# accuracy = accuracy_score(y_test, y_pred)
-# print(f"Random Forest Classifier Accuracy: {accuracy}")
+rf_classifier.fit(X, Y)
 
 def age_cat(age):
     if 18 <= age <= 24:
@@ -133,7 +128,7 @@ def categorize_height(height_cm):
 def home():
     return render_template('index.html')
 
-@app.route('/about',methods=['GET'])
+@app.route('/about', methods=['GET'])
 def about():
     return render_template('about.html')
 
@@ -165,7 +160,6 @@ def predict():
         potato = request.form['potato'].lower()
         
         input_data = {
-
             'General_Health': general_health.capitalize(),
             'Checkup': checkup,
             'Exercise': exercise.capitalize(),
