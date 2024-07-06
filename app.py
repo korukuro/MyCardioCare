@@ -1,27 +1,30 @@
-from flask import Flask, request, render_template
-from flask_mail import Mail, Message
+import streamlit as st
 import numpy as np
 import pandas as pd
 from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
 from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
 from dotenv import load_dotenv
 import os
+import smtplib
+from email.mime.text import MIMEText
 
 # Load environment variables from .env file
 load_dotenv()
 
-app = Flask(__name__)
-app.config['MAIL_SERVER'] = 'smtp.gmail.com'
-app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'mycardiocareindia@gmail.com'  # Your email address
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # Load email password from .env
-app.config['MAIL_USE_TLS'] = False
-app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_DEFAULT_SENDER'] = 'mycardiocare@gmail.com'  # Default sender email
+# Function to send an email
+def send_email(subject, body, to):
+    gmail_user = 'mycardiocareindia@gmail.com'
+    gmail_password = os.getenv('MAIL_PASSWORD')
 
-mail = Mail(app)
+    msg = MIMEText(body)
+    msg['Subject'] = subject
+    msg['From'] = gmail_user
+    msg['To'] = to
+
+    server = smtplib.SMTP_SSL('smtp.gmail.com', 465)
+    server.login(gmail_user, gmail_password)
+    server.send_message(msg)
+    server.quit()
 
 # Load the data
 dataframe = pd.read_csv("static/myheart.csv")
@@ -29,11 +32,10 @@ df = pd.DataFrame(dataframe)
 df = df.astype(str)
 
 # Encode categorical features
-columns_to_encode = ['General_Health', 'Checkup', 'Exercise','Skin_Cancer', 'Other_Cancer', 'Depression', 'Diabetes', 'Arthritis', 'Sex', 'Age_Category', 'Height_(cm)', 'Weight_(kg)', 'Smoking_History', 'Alcohol_Consumption', 'Fruit_Consumption', 'Green_Vegetables_Consumption', 'FriedPotato_Consumption']
+columns_to_encode = ['General_Health', 'Checkup', 'Exercise', 'Skin_Cancer', 'Other_Cancer', 'Depression', 'Diabetes', 'Arthritis', 'Sex', 'Age_Category', 'Height_(cm)', 'Weight_(kg)', 'Smoking_History', 'Alcohol_Consumption', 'Fruit_Consumption', 'Green_Vegetables_Consumption', 'FriedPotato_Consumption']
 
 # Create a dictionary to store the label encoders for each column
 label_encoders = {}
-
 for column in columns_to_encode:
     label_encoders[column] = LabelEncoder()
     df[column] = label_encoders[column].fit_transform(df[column])
@@ -48,9 +50,32 @@ Y = target_encoder.fit_transform(Y)
 
 # Initialize the random forest classifier
 rf_classifier = RandomForestClassifier()
-
-# Fit the random forest classifier
 rf_classifier.fit(X, Y)
+
+# Streamlit app
+st.title("My CardioCare App")
+st.write("Enter your details to predict the possibility of heart disease.")
+
+# Collect user inputs
+customer_name = st.text_input("Customer Name")
+customer_email = st.text_input("Customer Email")
+general_health = st.selectbox("General Health", df['General_Health'].unique())
+checkup = st.selectbox("Checkup", df['Checkup'].unique())
+exercise = st.selectbox("Exercise", df['Exercise'].unique())
+skin_cancer = st.selectbox("Skin Cancer", df['Skin_Cancer'].unique())
+other_cancer = st.selectbox("Other Cancer", df['Other_Cancer'].unique())
+depression = st.selectbox("Depression", df['Depression'].unique())
+diabetes = st.selectbox("Diabetes", df['Diabetes'].unique())
+arthritis = st.selectbox("Arthritis", df['Arthritis'].unique())
+sex = st.selectbox("Sex", df['Sex'].unique())
+age = st.number_input("Age", min_value=0, max_value=120, step=1)
+height = st.number_input("Height (cm)", min_value=0.0, max_value=300.0, step=0.1)
+weight = st.number_input("Weight (kg)", min_value=0.0, max_value=300.0, step=0.1)
+smoking = st.selectbox("Smoking History", df['Smoking_History'].unique())
+alcohol = st.selectbox("Alcohol Consumption", df['Alcohol_Consumption'].unique())
+fruit = st.selectbox("Fruit Consumption", df['Fruit_Consumption'].unique())
+vegetable = st.selectbox("Green Vegetables Consumption", df['Green_Vegetables_Consumption'].unique())
+potato = st.selectbox("Fried Potato Consumption", df['FriedPotato_Consumption'].unique())
 
 def age_cat(age):
     if 18 <= age <= 24:
@@ -124,40 +149,10 @@ def categorize_height(height_cm):
     elif height_cm < 140:
         return "Up to 139 cm"
 
-@app.route('/')
-def home():
-    return render_template('index.html')
-
-@app.route('/about', methods=['GET'])
-def about():
-    return render_template('about.html')
-
-@app.route('/predict', methods=['POST'])
-def predict():
+# Predict button
+if st.button("Predict"):
     try:
-        # Get customer name and email
-        customer_name = request.form['customer_name']
-        customer_email = request.form['customer_email']
-        
-        # Get symptoms data
-        general_health = request.form['general_health'].lower()
-        checkup = request.form['checkup'].lower()
-        exercise = request.form['exercise'].lower()
-        skin_cancer = request.form['skin_cancer'].lower()
-        other_cancer = request.form['other_cancer'].lower()
-        depression = request.form['depression'].lower()
-        diabetes = request.form['diabetes'].lower()
-        arthritis = request.form['arthritis'].lower()
-        sex = request.form['sex'].lower()
-        age = int(request.form['age'])
         age_category = age_cat(age)
-        height = float(request.form['height'])
-        weight = float(request.form['weight'])
-        smoking = request.form['smoking'].lower()
-        alcohol = request.form['alcohol'].lower()
-        fruit = request.form['fruit'].lower()
-        vegetable = request.form['vegetable'].lower()
-        potato = request.form['potato'].lower()
         
         input_data = {
             'General_Health': general_health.capitalize(),
@@ -197,17 +192,10 @@ def predict():
             message = f"Dear {customer_name},\n\nBased on the information you provided, our analysis does not indicate a possibility of heart disease. However, it is important to consult with your healthcare provider for a comprehensive evaluation.\n\nBest regards,\nTeam myCardioCare"
 
         # Send email to the customer
-        msg = Message('Disease Prediction Result', recipients=[customer_email])
-        msg.body = message
-        mail.send(msg)
+        send_email('Disease Prediction Result', message, customer_email)
         
-        # Print prediction to console for verification
-        print(message)
-        
-        return render_template('result.html', prediction_text=f'The possibility of heart disease is: {predicted_label}', message=message)
+        st.success('Prediction: ' + predicted_label)
+        st.write(message)
     
     except Exception as e:
-        return render_template('result.html', prediction_text=f'An error occurred: {str(e)}')
-
-if __name__ == "__main__":
-    app.run(debug=True)
+        st.error('An error occurred: ' + str(e))
