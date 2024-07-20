@@ -1,11 +1,9 @@
+# app.py
 from flask import Flask, request, render_template
 from flask_mail import Mail, Message
 import numpy as np
 import pandas as pd
-from sklearn.preprocessing import LabelEncoder
-from sklearn.model_selection import train_test_split
-from sklearn.ensemble import RandomForestClassifier
-from sklearn.metrics import accuracy_score
+import joblib
 from dotenv import load_dotenv
 import os
 
@@ -15,42 +13,18 @@ load_dotenv()
 app = Flask(__name__)
 app.config['MAIL_SERVER'] = 'smtp.gmail.com'
 app.config['MAIL_PORT'] = 465
-app.config['MAIL_USERNAME'] = 'mycardiocareindia@gmail.com'  # Your email address
-app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')  # Load email password from .env
+app.config['MAIL_USERNAME'] = 'mycardiocareindia@gmail.com'
+app.config['MAIL_PASSWORD'] = os.getenv('MAIL_PASSWORD')
 app.config['MAIL_USE_TLS'] = False
 app.config['MAIL_USE_SSL'] = True
-app.config['MAIL_DEFAULT_SENDER'] = 'mycardiocare@gmail.com'  # Default sender email
+app.config['MAIL_DEFAULT_SENDER'] = 'mycardiocare@gmail.com'
 
 mail = Mail(app)
 
-# Load the data
-dataframe = pd.read_csv("static/myheart.csv")
-df = pd.DataFrame(dataframe)
-df = df.astype(str)
-
-# Encode categorical features
-columns_to_encode = ['General_Health', 'Checkup', 'Exercise','Skin_Cancer', 'Other_Cancer', 'Depression', 'Diabetes', 'Arthritis', 'Sex', 'Age_Category', 'Height_(cm)', 'Weight_(kg)', 'Smoking_History', 'Alcohol_Consumption', 'Fruit_Consumption', 'Green_Vegetables_Consumption', 'FriedPotato_Consumption']
-
-# Create a dictionary to store the label encoders for each column
-label_encoders = {}
-
-for column in columns_to_encode:
-    label_encoders[column] = LabelEncoder()
-    df[column] = label_encoders[column].fit_transform(df[column])
-
-# Separate features and target variable
-X = df.iloc[:, 0:17].values
-Y = df.iloc[:, 17].values
-
-# Encode the target variable
-target_encoder = LabelEncoder()
-Y = target_encoder.fit_transform(Y)
-
-# Initialize the random forest classifier
-rf_classifier = RandomForestClassifier()
-
-# Fit the random forest classifier
-rf_classifier.fit(X, Y)
+# Load the model and encoders
+rf_classifier = joblib.load('rf_classifier.pkl')
+label_encoders = joblib.load('label_encoders.pkl')
+target_encoder = joblib.load('target_encoder.pkl')
 
 def age_cat(age):
     if 18 <= age <= 24:
@@ -183,7 +157,7 @@ def predict():
         input_df = input_df.astype(str)
 
         # Transform categorical columns using label_encoders
-        for column in columns_to_encode:
+        for column in label_encoders:
             input_df[column] = label_encoders[column].transform(input_df[column])
 
         # Make prediction using the trained model
