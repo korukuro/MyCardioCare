@@ -1,6 +1,5 @@
 Flask
 Flask-Mail
-numpy
 pandas
 scikit-learn
 python-dotenv
