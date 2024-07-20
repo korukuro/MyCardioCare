@@ -1,11 +1,12 @@
 {
   "version": 2,
-  "name": "Heart Disease Prediction App",
   "builds": [
     {
       "src": "app.py",
       "use": "@vercel/python",
-      "config": { "runtime": "python3.12" }
+      "config": {
+        "maxLambdaSize": "50mb"  // Adjust this if necessary
+      }
     }
   ],
   "routes": [
