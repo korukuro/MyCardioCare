@@ -12,9 +12,5 @@
       "src": "/(.*)",
       "dest": "app.py"
     }
-  ],
-  "env": {
-    "MAIL_USERNAME": "mycardiocareindia@gmail.com",
-    "MAIL_PASSWORD": "@@MAIL_PASSWORD@@"
-  }
+  ]
 }
