@@ -1,9 +1,7 @@
 # app.py
 from flask import Flask, request, render_template
 from flask_mail import Mail, Message
-import numpy as np
 import pandas as pd
-import joblib
 from dotenv import load_dotenv
 import os
 
