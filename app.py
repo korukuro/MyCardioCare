@@ -1,5 +1,6 @@
 # app.py
 from flask import Flask, request, render_template
+import jobblib
 from flask_mail import Mail, Message
 import pandas as pd
 from dotenv import load_dotenv
