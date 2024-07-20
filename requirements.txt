@@ -1,7 +1,7 @@
-Flask==2.1.1
-Flask-Mail==0.9.1
-numpy==1.23.1
-pandas==1.4.3
-scikit-learn==1.1.1
-python-dotenv==0.21.0
-gunicorn==20.1.0
+Flask
+Flask-Mail
+numpy
+pandas
+scikit-learn
+python-dotenv
+gunicorn
