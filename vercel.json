@@ -14,11 +14,7 @@
     }
   ],
   "env": {
-    "MAIL_USERNAME": "mycardiocareindia@gmail.com"
-  },
-  "build": {
-    "env": {
-      "MAIL_PASSWORD": "@@MAIL_PASSWORD@@"
-    }
+    "MAIL_USERNAME": "mycardiocareindia@gmail.com",
+    "MAIL_PASSWORD": "@@MAIL_PASSWORD@@"
   }
 }
