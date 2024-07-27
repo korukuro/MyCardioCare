@@ -1,12 +1,8 @@
 [build]
-  functions = "functions"
-  command = "pip install -r requirements.txt"
-
-[functions]
-  directory = "functions"
-  external_node_modules = ["flask", "flask-mail", "numpy", "pandas", "joblib", "python-dotenv"]
+  command = "pip install -r requirements.txt && python app.py"
+  publish = "public"
 
 [[redirects]]
   from = "/*"
-  to = "/.netlify/functions/wsgi"
+  to = "/index.html"
   status = 200
