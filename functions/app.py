@@ -1,8 +1,9 @@
 # app.py
 from flask import Flask, request, render_template
-import jobblib
 from flask_mail import Mail, Message
+import numpy as np
 import pandas as pd
+import joblib
 from dotenv import load_dotenv
 import os
 
@@ -21,7 +22,7 @@ app.config['MAIL_DEFAULT_SENDER'] = 'mycardiocare@gmail.com'
 mail = Mail(app)
 
 # Load the model and encoders
-rf_classifier = joblib.load('rf_classifier.pkl')
+rf_classifier = joblib.load('rf_classifier_compressed.pkl')
 label_encoders = joblib.load('label_encoders.pkl')
 target_encoder = joblib.load('target_encoder.pkl')
 
@@ -164,7 +165,7 @@ def predict():
         predicted_label = target_encoder.inverse_transform([prediction])[0]
         
         # Prepare the message to send
-        if predicted_label == 'Yes':
+        if (predicted_label == 'Yes'):
             message = f"Dear {customer_name},\n\nBased on the information you provided, our analysis suggests a potential concern regarding heart disease. However, please note that this is a prediction and not a definitive diagnosis.\n\nWe strongly recommend consulting with your healthcare provider for further evaluation and guidance.\n\nBest regards,\nTeam myCardioCare"
         else:
             message = f"Dear {customer_name},\n\nBased on the information you provided, our analysis does not indicate a possibility of heart disease. However, it is important to consult with your healthcare provider for a comprehensive evaluation.\n\nBest regards,\nTeam myCardioCare"
