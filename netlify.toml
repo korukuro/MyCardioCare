@@ -1,8 +1,12 @@
 [build]
+  # Command to run during the build process
   command = "pip install -r requirements.txt && python app.py"
+  # Directory to publish (leave empty if not used)
   publish = "public"
 
 [[redirects]]
+  # Redirect all requests to the Flask app
   from = "/*"
   to = "/index.html"
   status = 200
+  force = true
